@@ -1,0 +1,516 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no"/>
+<meta name="apple-mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
+<meta name="apple-mobile-web-app-title" content="B787 Check"/>
+<meta name="mobile-web-app-capable" content="yes"/>
+<meta name="theme-color" content="#0A0E1A"/>
+<title>B787 Landing Check – Air India FSQ</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=DM+Sans:wght@400;500;600;700&display=swap');
+:root{--bg:#0A0E1A;--surf:#111827;--surf2:#1C2333;--bor:#2A3444;--acc:#00D4FF;--red:#FF4444;--grn:#00E676;--yel:#FFD600;--txt:#E8EDF5;--muted:#6B7A99;--mono:'JetBrains Mono',monospace;--sans:'DM Sans',sans-serif;}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+html,body{background:var(--bg);color:var(--txt);font-family:var(--sans);height:100%;overflow:hidden;}
+body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(rgba(0,212,255,.025) 1px,transparent 1px),linear-gradient(90deg,rgba(0,212,255,.025) 1px,transparent 1px);background-size:32px 32px;pointer-events:none;z-index:0;}
+.app{position:relative;z-index:1;height:100vh;height:100dvh;display:flex;flex-direction:column;max-width:480px;margin:0 auto;}
+.hdr{background:linear-gradient(180deg,#0D1B2E,#0A1220);border-bottom:1px solid var(--bor);padding:calc(env(safe-area-inset-top,0px) + 10px) 16px 10px;display:flex;align-items:center;gap:12px;flex-shrink:0;}
+.hdr-logo{width:40px;height:40px;border-radius:10px;background:linear-gradient(135deg,var(--acc),#0077AA);display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;box-shadow:0 0 14px rgba(0,212,255,.35);}
+.hdr-title{font-family:var(--mono);font-size:13px;font-weight:700;color:var(--acc);letter-spacing:.07em;}
+.hdr-sub{font-size:10px;color:var(--muted);margin-top:1px;}
+.hdr-badge{margin-left:auto;background:rgba(0,212,255,.1);border:1px solid rgba(0,212,255,.3);color:var(--acc);font-family:var(--mono);font-size:9px;padding:3px 8px;border-radius:20px;letter-spacing:.05em;white-space:nowrap;}
+.prog{display:flex;background:var(--surf);border-bottom:1px solid var(--bor);flex-shrink:0;}
+.prog-step{flex:1;padding:10px 4px;text-align:center;font-size:10px;font-weight:600;letter-spacing:.05em;text-transform:uppercase;color:var(--muted);border-bottom:2px solid transparent;transition:all .2s;}
+.prog-step.active{color:var(--acc);border-bottom-color:var(--acc);}
+.prog-step.done{color:var(--grn);border-bottom-color:var(--grn);}
+.content{flex:1;overflow-y:auto;overflow-x:hidden;padding:14px 14px calc(env(safe-area-inset-bottom,0px) + 80px);-webkit-overflow-scrolling:touch;}
+.sec-lbl{font-family:var(--mono);font-size:9px;font-weight:700;color:var(--acc);letter-spacing:.12em;text-transform:uppercase;margin:18px 0 8px;display:flex;align-items:center;gap:8px;}
+.sec-lbl::after{content:'';flex:1;height:1px;background:linear-gradient(to right,var(--bor),transparent);}
+.card{background:var(--surf);border:1px solid var(--bor);border-radius:12px;overflow:hidden;margin-bottom:8px;}
+.card-row{display:flex;align-items:center;padding:12px 14px;border-bottom:1px solid var(--bor);gap:10px;min-height:52px;}
+.card-row:last-child{border-bottom:none;}
+.row-lbl{flex:1;}
+.row-lbl-main{font-size:14px;color:var(--txt);font-weight:500;}
+.row-lbl-sub{font-size:10px;color:var(--muted);margin-top:2px;font-family:var(--mono);}
+.row-val{display:flex;align-items:center;gap:8px;}
+.p-inp{background:var(--surf2);border:1.5px solid var(--bor);border-radius:8px;color:var(--txt);font-family:var(--mono);font-size:16px;font-weight:700;width:82px;text-align:right;padding:7px 8px;outline:none;transition:border-color .2s,box-shadow .2s;-webkit-appearance:none;}
+.p-inp:focus{border-color:var(--acc);box-shadow:0 0 0 3px rgba(0,212,255,.12);}
+.p-inp.exc{border-color:var(--red);color:var(--red);box-shadow:0 0 0 3px rgba(255,68,68,.1);}
+.p-inp.ok{border-color:rgba(0,230,118,.35);color:var(--grn);}
+.t-inp{background:var(--surf2);border:1.5px solid var(--bor);border-radius:8px;color:var(--acc);font-family:var(--mono);font-size:13px;padding:7px 10px;outline:none;width:160px;text-align:right;-webkit-appearance:none;}
+.t-inp:focus{border-color:var(--acc);}
+.unit{font-family:var(--mono);font-size:10px;color:var(--muted);min-width:28px;}
+.dot{width:9px;height:9px;border-radius:50%;flex-shrink:0;}
+.dot.ok{background:var(--grn);box-shadow:0 0 5px var(--grn);}
+.dot.fail{background:var(--red);box-shadow:0 0 5px var(--red);}
+.dot.na{background:var(--bor);}
+.radio-row{display:flex;align-items:center;gap:12px;padding:11px 14px;cursor:pointer;border-bottom:1px solid var(--bor);min-height:48px;}
+.radio-row:last-child{border-bottom:none;}
+.rc{width:20px;height:20px;border-radius:50%;border:2px solid var(--muted);flex-shrink:0;display:flex;align-items:center;justify-content:center;}
+.rc.sel{border-color:var(--acc);}
+.rd{width:9px;height:9px;border-radius:50%;background:var(--acc);}
+.rl{font-size:14px;color:var(--txt);}
+.rs{font-size:10px;color:var(--muted);margin-top:1px;}
+.tog-wrap{display:flex;align-items:center;justify-content:space-between;padding:12px 14px;}
+.tog-t{font-size:14px;color:var(--txt);font-weight:500;}
+.tog-s{font-size:10px;color:var(--muted);margin-top:2px;font-family:var(--mono);}
+.tog{width:48px;height:28px;border-radius:14px;background:var(--surf2);border:1.5px solid var(--bor);position:relative;cursor:pointer;transition:background .2s;flex-shrink:0;}
+.tog.on{background:var(--acc);border-color:var(--acc);}
+.tog-th{width:22px;height:22px;border-radius:50%;background:#fff;position:absolute;top:2px;left:2px;transition:left .2s;box-shadow:0 1px 4px rgba(0,0,0,.3);}
+.tog.on .tog-th{left:22px;}
+.banner{border-radius:10px;padding:10px 14px;display:flex;gap:8px;align-items:flex-start;margin-bottom:8px;font-size:12px;line-height:1.5;}
+.banner.info{background:rgba(0,212,255,.07);border:1px solid rgba(0,212,255,.25);}
+.banner.warn{background:rgba(255,214,0,.07);border:1px solid rgba(255,214,0,.3);}
+.banner.err{background:rgba(255,68,68,.07);border:1px solid rgba(255,68,68,.3);}
+.banner.ok{background:rgba(0,230,118,.07);border:1px solid rgba(0,230,118,.3);}
+.banner-icon{font-size:15px;flex-shrink:0;margin-top:1px;}
+.banner-text{color:var(--txt);}
+.btn-row{display:flex;gap:10px;margin-top:20px;}
+.btn{padding:14px 16px;border-radius:12px;border:none;font-family:var(--sans);font-size:15px;font-weight:700;cursor:pointer;transition:all .15s;-webkit-appearance:none;touch-action:manipulation;}
+.btn:active{transform:scale(.97);}
+.btn-pri{background:linear-gradient(135deg,var(--acc),#0088CC);color:#000;flex:2;box-shadow:0 4px 14px rgba(0,212,255,.25);}
+.btn-sec{background:var(--surf);color:var(--acc);border:1.5px solid var(--bor);flex:1;}
+.btn-gho{background:var(--surf2);color:var(--muted);border:1.5px solid var(--bor);flex:1;}
+.btn-cam{background:linear-gradient(135deg,#FF6B35,#E84545);color:#fff;width:100%;padding:16px;border-radius:12px;border:none;font-family:var(--sans);font-size:15px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:10px;touch-action:manipulation;-webkit-appearance:none;}
+.btn-cam:active{transform:scale(.97);}
+/* ── SCAN AREA ── */
+.scan-zone{border:2px dashed rgba(0,212,255,.4);border-radius:14px;padding:24px 16px;text-align:center;background:rgba(0,212,255,.04);margin-bottom:8px;position:relative;overflow:hidden;}
+.scan-zone.scanning{border-color:var(--acc);animation:scanPulse 1.5s infinite;}
+@keyframes scanPulse{0%,100%{box-shadow:0 0 0 0 rgba(0,212,255,.3)}50%{box-shadow:0 0 0 8px rgba(0,212,255,0)}}
+.scan-line{position:absolute;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,var(--acc),transparent);animation:scanMove 2s linear infinite;display:none;}
+.scan-zone.scanning .scan-line{display:block;}
+@keyframes scanMove{0%{top:0%}100%{top:100%}}
+.scan-icon{font-size:40px;margin-bottom:10px;}
+.scan-title{font-family:var(--mono);font-size:13px;font-weight:700;color:var(--acc);margin-bottom:4px;}
+.scan-sub{font-size:11px;color:var(--muted);line-height:1.5;}
+/* ── PREVIEW IMAGE ── */
+.img-preview{width:100%;border-radius:10px;border:1px solid var(--bor);display:block;margin-bottom:8px;max-height:200px;object-fit:cover;}
+.img-wrap{position:relative;}
+.img-del{position:absolute;top:8px;right:8px;background:var(--red);color:#fff;border:none;border-radius:20px;width:28px;height:28px;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-weight:700;}
+/* ── EXTRACTED VALUES ── */
+.extracted-row{display:flex;align-items:center;justify-content:space-between;padding:8px 14px;border-bottom:1px solid var(--bor);}
+.extracted-row:last-child{border-bottom:none;}
+.ext-lbl{font-size:12px;color:var(--muted);flex:1;}
+.ext-val{font-family:var(--mono);font-size:14px;font-weight:700;color:var(--acc);margin-right:10px;}
+.ext-tick{font-size:14px;}
+/* ── SPINNER ── */
+.spinner{width:32px;height:32px;border:3px solid var(--bor);border-top-color:var(--acc);border-radius:50%;animation:spin .7s linear infinite;margin:12px auto;}
+@keyframes spin{to{transform:rotate(360deg)}}
+/* ── VERDICT ── */
+.verdict{border-radius:14px;padding:22px 18px;text-align:center;margin-bottom:14px;}
+.verdict.pass{background:rgba(0,230,118,.08);border:2px solid rgba(0,230,118,.4);}
+.verdict.fail{background:rgba(255,68,68,.08);border:2px solid rgba(255,68,68,.4);}
+.v-icon{font-size:44px;margin-bottom:10px;display:block;}
+.v-title{font-family:var(--mono);font-size:15px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;margin-bottom:6px;}
+.v-title.pass{color:var(--grn);}
+.v-title.fail{color:var(--red);}
+.v-reason{font-size:12px;color:var(--muted);line-height:1.5;}
+.sum-row{display:flex;align-items:center;justify-content:space-between;padding:10px 14px;border-bottom:1px solid var(--bor);gap:8px;}
+.sum-row:last-child{border-bottom:none;}
+.sum-p{font-size:13px;color:var(--txt);flex:1;}
+.sum-l{font-family:var(--mono);font-size:10px;color:var(--muted);margin-right:4px;}
+.sum-v{font-family:var(--mono);font-size:13px;font-weight:700;}
+.sum-v.ok{color:var(--grn);}
+.sum-v.fail{color:var(--red);}
+.sum-v.na{color:var(--muted);}
+.exc-row{padding:12px 14px;border-bottom:1px solid var(--bor);display:flex;justify-content:space-between;align-items:flex-start;gap:10px;}
+.exc-row:last-child{border-bottom:none;}
+.exc-p{font-size:14px;font-weight:700;color:var(--red);}
+.exc-d{font-size:10px;color:var(--muted);margin-top:2px;font-family:var(--mono);}
+.exc-v{font-family:var(--mono);font-size:16px;font-weight:700;color:var(--red);text-align:right;}
+.exc-delta{font-family:var(--mono);font-size:10px;color:rgba(255,68,68,.7);text-align:right;margin-top:2px;}
+.act-note{background:rgba(255,214,0,.06);border:1px solid rgba(255,214,0,.3);border-radius:12px;padding:14px 16px;margin-top:8px;}
+.act-title{font-family:var(--mono);font-size:10px;font-weight:700;color:var(--yel);letter-spacing:.08em;text-transform:uppercase;margin-bottom:6px;}
+.act-text{font-size:12px;color:#CCC;line-height:1.6;}
+.info-row{display:flex;justify-content:space-between;align-items:center;padding:10px 14px;border-bottom:1px solid var(--bor);}
+.info-row:last-child{border-bottom:none;}
+.info-lbl{font-size:14px;color:var(--muted);}
+.info-val{font-size:14px;font-weight:600;color:var(--txt);font-family:var(--mono);}
+/* ── PHOTO THUMB IN RESULT ── */
+.photo-thumb{width:100%;border-radius:10px;border:1px solid var(--bor);margin-top:4px;max-height:160px;object-fit:cover;display:block;}
+@keyframes fadeUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+.anim{animation:fadeUp .25s ease forwards;}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="hdr">
+    <div class="hdr-logo">&#9992;</div>
+    <div>
+      <div class="hdr-title">B787 LANDING CHECK</div>
+      <div class="hdr-sub">AMM 05-51-01 &middot; Phase I Exceedance Assessment</div>
+    </div>
+    <div class="hdr-badge">AI FSQ</div>
+  </div>
+  <div class="prog">
+    <div class="prog-step active" id="ps0">&#9312; Flight</div>
+    <div class="prog-step" id="ps1">&#9313; Scan / Enter</div>
+    <div class="prog-step" id="ps2">&#9314; Result</div>
+  </div>
+  <div class="content" id="content"></div>
+</div>
+
+<!-- Hidden file input for camera/gallery -->
+<input type="file" id="camInput" accept="image/*" capture="environment" style="display:none" onchange="handlePhoto(this)"/>
+<input type="file" id="galInput" accept="image/*" style="display:none" onchange="handlePhoto(this)"/>
+
+<script>
+// ─── AMM TABLE DATA ───────────────────────────────────────────
+var TABLES={
+  1:{label:"Table 1 - SR <= 360",lim:{sr:{n:null,x:360},pt:{n:null,x:10},cr:{n:-20,x:20},ra:{n:-8,x:8},brr:{n:-9,x:9},cga:{n:0.9,x:null},pka:{n:null,x:1.8},bpr:{n:-7,x:null}}},
+  2:{label:"Table 2 - SR 361-420",lim:{sr:{n:360,x:420},pt:{n:null,x:10},cr:{n:-20,x:20},ra:{n:-4,x:4},brr:{n:-6,x:6},cga:{n:0.9,x:null},pka:{n:null,x:1.9},bpr:{n:-7,x:null}}},
+  3:{label:"Table 3 - SR 421-480",lim:{sr:{n:420,x:480},pt:{n:null,x:10},cr:{n:-20,x:20},ra:{n:-2,x:2},brr:{n:-3,x:3},cga:{n:0.9,x:null},pka:{n:null,x:2.0},bpr:{n:-7,x:null}}},
+  4:{label:"Table 4 - SR 481-540",lim:{sr:{n:480,x:540},pt:{n:null,x:10},cr:{n:-20,x:20},ra:{n:-2,x:2},brr:{n:-1,x:1},cga:{n:0.9,x:null},pka:{n:null,x:2.0},bpr:{n:-7,x:null}}},
+  5:{label:"Table 5 - Overweight",lim:{sr:{n:null,x:360},pt:{n:null,x:10},cr:{n:-15,x:15},ra:{n:-2,x:2},brr:{n:-3,x:3},cga:{n:0.9,x:null},pka:{n:null,x:1.7},bpr:{n:-7,x:null}}}
+};
+var PARAMS=[
+  {k:"sr",l:"CG Sink Rate",u:"ft/min",sec:"PRIOR TO TOUCHDOWN"},
+  {k:"pt",l:"Pitch Attitude",u:"deg",sec:"PRIOR TO TOUCHDOWN"},
+  {k:"cr",l:"Crab Angle",u:"deg",sec:"PRIOR TO TOUCHDOWN"},
+  {k:"ra",l:"Roll Attitude",u:"deg",sec:"PRIOR TO TOUCHDOWN"},
+  {k:"brr",l:"Body Roll Rate",u:"deg/s",sec:"PRIOR TO TOUCHDOWN"},
+  {k:"cga",l:"CG Norm Accel",u:"g",sec:"PRIOR TO TOUCHDOWN"},
+  {k:"pka",l:"Peak CG Norm Accel",u:"g",sec:"TOUCHDOWN"},
+  {k:"bpr",l:"Body Pitch Rate",u:"deg/s",sec:"NOSE GEAR"}
+];
+
+// ─── STATE ───────────────────────────────────────────────────
+var S={
+  step:0,
+  flight:"AI2029",
+  date:new Date().toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'}),
+  ac:"VT-TSO",report:"hard",ow:false,
+  v:{sr:"",pt:"",cr:"",ra:"",brr:"",cga:"",pka:"",bpr:""},
+  photoDataUrl:null,   // base64 image from camera
+  scanDone:false,      // whether OCR has run
+  scanning:false       // spinner state
+};
+
+// ─── HELPERS ─────────────────────────────────────────────────
+function isExc(val,lim){var v=parseFloat(val);if(isNaN(v))return false;if(lim.n!==null&&v<lim.n)return true;if(lim.x!==null&&v>lim.x)return true;return false;}
+function ls(l){if(l.n!==null&&l.x!==null)return l.n+" to "+l.x;if(l.n!==null)return">= "+l.n;if(l.x!==null)return"<= "+l.x;return"N/A";}
+function getTK(){if(S.ow)return 5;var sr=parseFloat(S.v.sr);if(isNaN(sr))return null;if(sr>540)return"AUTO";if(sr>480)return 4;if(sr>420)return 3;if(sr>360)return 2;return 1;}
+function isAuto(){return["bounced","nose","drag"].indexOf(S.report)>=0||getTK()==="AUTO";}
+function evaluate(){
+  if(isAuto()){var r=S.report==="bounced"?"Hard bounced landing - automatic Phase I trigger.":S.report==="nose"?"Nose gear first contact - auto Phase I trigger.":S.report==="drag"?"High drag/side load - auto Phase I trigger.":"CG Sink Rate >540 ft/min - Phase I mandatory.";return{verdict:"FAIL",reason:r,excs:[]};}
+  var tk=getTK();if(!tk)return null;
+  var td=TABLES[tk];var excs=[];
+  for(var i=0;i<PARAMS.length;i++){var p=PARAMS[i];var val=S.v[p.k];if(val===""||val===undefined)continue;if(isExc(val,td.lim[p.k]))excs.push({k:p.k,l:p.l,u:p.u,sec:p.sec,val:val,lim:td.lim[p.k]});}
+  return excs.length>0?{verdict:"FAIL",reason:excs.length+" parameter(s) exceeded AMM limits.",excs}:{verdict:"PASS",reason:"All values within limits. No Phase I inspection required.",excs:[]};
+}
+function updProg(){for(var i=0;i<3;i++){var el=document.getElementById("ps"+i);if(!el)continue;el.className="prog-step"+(i===S.step?" active":i<S.step?" done":"");}}
+
+// ─── OCR: Parse LCMP report text ────────────────────────────
+// Patterns match Boeing ATA 51 LCMP printout format
+function parseLCMP(text){
+  var out={};
+  // Normalise — collapse whitespace, uppercase
+  var t=text.replace(/\r?\n/g,' ').replace(/\s+/g,' ').toUpperCase();
+
+  function extract(patterns){
+    for(var i=0;i<patterns.length;i++){
+      var m=t.match(patterns[i]);
+      if(m){var v=m[1].replace(/[^0-9.\-+]/g,'');if(v!=="")return v;}
+    }
+    return "";
+  }
+
+  // CG SINK RATE
+  out.sr=extract([
+    /CG\s*SINK\s*RATE[^0-9\-+]*([+\-]?\d+\.?\d*)/,
+    /SINK\s*RATE[^0-9\-+]*([+\-]?\d+\.?\d*)/
+  ]);
+  // PITCH ATTITUDE
+  out.pt=extract([
+    /PITCH\s*ATTITUDE[^0-9\-+]*([+\-]?\d+\.?\d*)/,
+    /PITCH\s*ATT[^0-9\-+]*([+\-]?\d+\.?\d*)/
+  ]);
+  // CRAB ANGLE
+  out.cr=extract([
+    /CRAB\s*ANGLE[^0-9\-+]*([+\-]?\d+\.?\d*)/,
+    /CRAB[^0-9\-+]*([+\-]?\d+\.?\d*)/
+  ]);
+  // ROLL ATTITUDE
+  out.ra=extract([
+    /ROLL\s*ATTITUDE[^0-9\-+]*([+\-]?\d+\.?\d*)/,
+    /ROLL\s*ATT[^0-9\-+]*([+\-]?\d+\.?\d*)/
+  ]);
+  // BODY ROLL RATE
+  out.brr=extract([
+    /BODY\s*ROLL\s*RATE[^0-9\-+]*([+\-]?\d+\.?\d*)/,
+    /ROLL\s*RATE[^0-9\-+]*([+\-]?\d+\.?\d*)/
+  ]);
+  // CG NORM ACCEL (prior to touchdown)
+  out.cga=extract([
+    /CG\s*NORM\s*ACCEL[^0-9\-+]*([+\-]?\d+\.?\d*)/,
+    /NORM\s*ACCEL[^0-9\-+]*([+\-]?\d+\.?\d*)/
+  ]);
+  // PEAK CG NORM ACCEL (touchdown)
+  out.pka=extract([
+    /PEAK\s*CG\s*NORM\s*ACCEL[^0-9\-+]*([+\-]?\d+\.?\d*)/,
+    /PEAK\s*NORM\s*ACCEL[^0-9\-+]*([+\-]?\d+\.?\d*)/,
+    /PEAK\s*CG[^0-9\-+]*([+\-]?\d+\.?\d*)/
+  ]);
+  // BODY PITCH RATE
+  out.bpr=extract([
+    /BODY\s*PITCH\s*RATE[^0-9\-+]*([+\-]?\d+\.?\d*)/,
+    /PITCH\s*RATE[^0-9\-+]*([+\-]?\d+\.?\d*)/
+  ]);
+
+  // Also try flight number and date
+  var fm=t.match(/FLIGHT\s*(?:NO|NUMBER|#)?[:\s]*([A-Z]{2}\d{2,4})/);
+  if(fm)out.flight=fm[1];
+  var dm=t.match(/DATE[:\s]*(\d{2}\s+[A-Z]{3}\s+\d{2,4})/);
+  if(dm)out.date=dm[1];
+  var am=t.match(/(?:REG|REGISTRATION|IDENT)[:\s]*([A-Z]{2}-[A-Z]{3})/);
+  if(am)out.ac=am[1];
+
+  return out;
+}
+
+// ─── HANDLE PHOTO ────────────────────────────────────────────
+function handlePhoto(input){
+  if(!input.files||!input.files[0])return;
+  var file=input.files[0];
+  var reader=new FileReader();
+  reader.onload=function(e){
+    S.photoDataUrl=e.target.result;
+    S.scanDone=false;
+    S.scanning=true;
+    render(); // show spinner + preview
+    runOCR(e.target.result);
+  };
+  reader.readAsDataURL(file);
+  input.value=""; // reset so same file can be reselected
+}
+
+// ─── OCR via Tesseract.js (loaded from CDN) ──────────────────
+var tesseractLoaded=false;
+function loadTesseract(cb){
+  if(window.Tesseract){cb();return;}
+  var s=document.createElement('script');
+  s.src='https://cdnjs.cloudflare.com/ajax/libs/tesseract.js/4.1.1/tesseract.min.js';
+  s.onload=function(){cb();};
+  s.onerror=function(){
+    // Tesseract failed to load — use manual entry fallback
+    S.scanning=false;
+    S.scanDone=false;
+    showOCRError("OCR library could not load. Please enter values manually below.");
+    render();
+  };
+  document.head.appendChild(s);
+}
+
+function runOCR(dataUrl){
+  loadTesseract(function(){
+    Tesseract.recognize(dataUrl,'eng',{
+      logger:function(m){
+        // update progress if needed
+      }
+    }).then(function(result){
+      var text=result.data.text;
+      var parsed=parseLCMP(text);
+      // Apply extracted values
+      var anyFound=false;
+      if(parsed.sr){S.v.sr=parsed.sr;anyFound=true;}
+      if(parsed.pt){S.v.pt=parsed.pt;anyFound=true;}
+      if(parsed.cr){S.v.cr=parsed.cr;anyFound=true;}
+      if(parsed.ra){S.v.ra=parsed.ra;anyFound=true;}
+      if(parsed.brr){S.v.brr=parsed.brr;anyFound=true;}
+      if(parsed.cga){S.v.cga=parsed.cga;anyFound=true;}
+      if(parsed.pka){S.v.pka=parsed.pka;anyFound=true;}
+      if(parsed.bpr){S.v.bpr=parsed.bpr;anyFound=true;}
+      if(parsed.flight)S.flight=parsed.flight;
+      if(parsed.date)S.date=parsed.date;
+      if(parsed.ac)S.ac=parsed.ac;
+      S.scanning=false;
+      S.scanDone=true;
+      S.scanFound=anyFound;
+      S.rawOCR=text; // keep for debug
+      render();
+    }).catch(function(err){
+      S.scanning=false;
+      S.scanDone=false;
+      S.scanError="OCR failed. Please enter values manually.";
+      render();
+    });
+  });
+}
+
+function showOCRError(msg){S.scanError=msg;}
+
+// ─── STEP 0: FLIGHT INFO ─────────────────────────────────────
+function step0(){
+  var rpts=[{v:"hard",l:"Hard Landing",s:"Table check required"},{v:"bounced",l:"Hard Bounced Landing",s:"Auto Phase I trigger"},{v:"nose",l:"Nose Gear First Contact",s:"Auto Phase I trigger"},{v:"drag",l:"High Drag / Side Load",s:"Auto Phase I trigger"}];
+  var h='<div class="sec-lbl">Flight Details</div><div class="card">';
+  h+='<div class="card-row"><div class="row-lbl"><div class="row-lbl-main">Flight Number</div></div><input class="t-inp" id="i_flt" value="'+S.flight+'" placeholder="e.g. AI2029"/></div>';
+  h+='<div class="card-row"><div class="row-lbl"><div class="row-lbl-main">Date</div></div><input class="t-inp" id="i_date" value="'+S.date+'" placeholder="DD Mon YYYY"/></div>';
+  h+='<div class="card-row"><div class="row-lbl"><div class="row-lbl-main">Aircraft Reg.</div></div><input class="t-inp" id="i_ac" value="'+S.ac+'" placeholder="e.g. VT-TSO"/></div></div>';
+  h+='<div class="sec-lbl">Landing Condition</div><div class="card">';
+  for(var i=0;i<rpts.length;i++){var r=rpts[i];h+='<div class="radio-row" onclick="selR(\''+r.v+'\')"><div class="rc'+(S.report===r.v?' sel':'')+'">'+(S.report===r.v?'<div class="rd"></div>':'')+'</div><div><div class="rl">'+r.l+'</div><div class="rs">'+r.s+'</div></div></div>';}
+  h+='</div>';
+  h+='<div class="card"><div class="tog-wrap"><div><div class="tog-t">Overweight Landing</div><div class="tog-s">Weight &gt; MLW + 3,600 lb</div></div><div class="tog'+(S.ow?' on':'')+'" onclick="togOW()"><div class="tog-th"></div></div></div></div>';
+  if(isAuto())h+='<div class="banner warn"><span class="banner-icon">&#9889;</span><span class="banner-text">Auto Phase I trigger active.</span></div>';
+  h+='<div class="btn-row"><button class="btn btn-pri" onclick="go(1)">Next: Scan LCMP &rarr;</button></div>';
+  return h;
+}
+
+// ─── STEP 1: SCAN + PARAMS ───────────────────────────────────
+function step1(){
+  var tk=getTK();var td=(tk&&tk!=="AUTO")?TABLES[tk]:null;
+  var h="";
+
+  // ── SCAN SECTION ──
+  h+='<div class="sec-lbl">&#128247; LCMP Report Scan</div>';
+
+  if(!S.photoDataUrl){
+    // No photo yet — show scan prompt
+    h+='<div class="scan-zone" id="scanZone">';
+    h+='<div class="scan-line"></div>';
+    h+='<div class="scan-icon">&#128247;</div>';
+    h+='<div class="scan-title">Scan LCMP Printout</div>';
+    h+='<div class="scan-sub">Take a clear photo of the Boeing ATA 51<br>Landing Conditions Maintenance Page.<br>Values will be auto-filled below.</div>';
+    h+='</div>';
+    h+='<div style="display:flex;gap:10px;margin-bottom:8px;">';
+    h+='<button class="btn-cam" style="flex:1" onclick="document.getElementById(\'camInput\').click()">&#128247; Take Photo</button>';
+    h+='<button class="btn-cam" style="flex:1;background:linear-gradient(135deg,#6B7A99,#3A4455)" onclick="document.getElementById(\'galInput\').click()">&#128444; Gallery</button>';
+    h+='</div>';
+  } else if(S.scanning){
+    // Scanning in progress
+    h+='<div class="scan-zone scanning" id="scanZone">';
+    h+='<div class="scan-line"></div>';
+    h+='<div class="img-wrap"><img class="img-preview" src="'+S.photoDataUrl+'"/></div>';
+    h+='<div class="spinner"></div>';
+    h+='<div class="scan-title">Reading LCMP values...</div>';
+    h+='<div class="scan-sub">OCR in progress. Please wait.</div>';
+    h+='</div>';
+  } else {
+    // Photo captured + OCR done
+    h+='<div class="img-wrap"><img class="img-preview" src="'+S.photoDataUrl+'"/><button class="img-del" onclick="clearPhoto()">&#10005;</button></div>';
+    if(S.scanDone&&S.scanFound){
+      h+='<div class="banner ok"><span class="banner-icon">&#9989;</span><span class="banner-text">LCMP values extracted successfully. Please verify below and correct if needed.</span></div>';
+      // Show extracted summary
+      h+='<div class="card">';
+      var labels={sr:"CG Sink Rate",pt:"Pitch Attitude",cr:"Crab Angle",ra:"Roll Attitude",brr:"Body Roll Rate",cga:"CG Norm Accel",pka:"Peak CG Norm Accel",bpr:"Body Pitch Rate"};
+      for(var k in labels){
+        if(S.v[k]!==""){
+          h+='<div class="extracted-row"><span class="ext-lbl">'+labels[k]+'</span><span class="ext-val">'+S.v[k]+'</span><span class="ext-tick">&#9989;</span></div>';
+        }
+      }
+      h+='</div>';
+    } else {
+      h+='<div class="banner warn"><span class="banner-icon">&#9888;</span><span class="banner-text">'+(S.scanError||"Could not read all values. Please enter manually below.")+'</span></div>';
+    }
+    h+='<div style="display:flex;gap:10px;margin-bottom:8px;">';
+    h+='<button class="btn-cam" style="flex:1;font-size:13px" onclick="document.getElementById(\'camInput\').click()">&#128247; Retake</button>';
+    h+='<button class="btn-cam" style="flex:1;font-size:13px;background:linear-gradient(135deg,#6B7A99,#3A4455)" onclick="document.getElementById(\'galInput\').click()">&#128444; Gallery</button>';
+    h+='</div>';
+  }
+
+  // ── TABLE BANNER ──
+  if(tk==="AUTO"){
+    h+='<div class="banner err"><span class="banner-icon">&#128308;</span><span class="banner-text">CG Sink Rate >540 ft/min - Phase I mandatory.</span></div>';
+  } else if(isAuto()){
+    h+='<div class="banner warn"><span class="banner-icon">&#9889;</span><span class="banner-text">Auto trigger active.</span></div>';
+  } else if(td&&(S.v.sr!=="")){
+    h+='<div class="banner info"><span class="banner-icon">&#128203;</span><span class="banner-text">Applicable: <strong>'+td.label+'</strong></span></div>';
+  }
+
+  // ── PARAMETER INPUTS ──
+  h+='<div class="sec-lbl">&#9997; Verify / Enter Values</div>';
+  var secs=["PRIOR TO TOUCHDOWN","TOUCHDOWN","NOSE GEAR"];
+  for(var s=0;s<secs.length;s++){
+    var sec=secs[s];var ps=[];
+    for(var i=0;i<PARAMS.length;i++){if(PARAMS[i].sec===sec)ps.push(PARAMS[i]);}
+    h+='<div class="sec-lbl" style="font-size:8px;color:var(--muted);margin-top:10px">'+sec+'</div><div class="card">';
+    for(var i=0;i<ps.length;i++){
+      var p=ps[i];var lim=td?td.lim[p.k]:null;var val=S.v[p.k];
+      var isE=lim&&val!==""?isExc(val,lim):false;
+      var ic=val===""?"":isE?"exc":"ok";var dc=val===""?"na":isE?"fail":"ok";
+      h+='<div class="card-row"><div class="row-lbl"><div class="row-lbl-main">'+p.l+'</div>'+(lim?'<div class="row-lbl-sub">Limit: '+ls(lim)+' '+p.u+'</div>':'')+'</div>';
+      h+='<div class="row-val"><input type="number" class="p-inp '+ic+'" id="pv_'+p.k+'" value="'+val+'" placeholder="--" inputmode="decimal" oninput="upP(\''+p.k+'\',this.value)"/><span class="unit">'+p.u+'</span><div class="dot '+dc+'"></div></div></div>';
+    }
+    h+='</div>';
+  }
+  h+='<div class="btn-row"><button class="btn btn-sec" onclick="go(0)">&larr; Back</button><button class="btn btn-pri" onclick="go(2)">Assess &rarr;</button></div>';
+  return h;
+}
+
+// ─── STEP 2: RESULT ──────────────────────────────────────────
+function step2(){
+  var result=evaluate();
+  if(!result)return'<div class="banner warn"><span class="banner-icon">&#9888;</span><span class="banner-text">Enter CG Sink Rate to assess.</span></div>';
+  var pass=result.verdict==="PASS";var tk=getTK();var td=(tk&&tk!=="AUTO")?TABLES[tk]:null;
+  var h='<div class="verdict '+(pass?'pass':'fail')+' anim"><span class="v-icon">'+(pass?"&#9989;":"&#128721;")+'</span><div class="v-title '+(pass?'pass':'fail')+'">'+(pass?"NO INSPECTION REQUIRED":"PHASE I INSPECTION REQUIRED")+'</div><div class="v-reason">'+result.reason+'</div></div>';
+
+  // LCMP photo in result
+  if(S.photoDataUrl){
+    h+='<div class="sec-lbl">&#128247; LCMP Report Photo</div>';
+    h+='<div class="card" style="padding:10px 14px"><img class="photo-thumb" src="'+S.photoDataUrl+'"/></div>';
+  }
+
+  // Flight summary
+  var rlabels={hard:"Hard Landing",bounced:"Hard Bounced",nose:"Nose First",drag:"High Drag"};
+  h+='<div class="sec-lbl">Landing Summary</div><div class="card">';
+  h+='<div class="info-row"><span class="info-lbl">Flight</span><span class="info-val">'+S.flight+'</span></div>';
+  h+='<div class="info-row"><span class="info-lbl">Date</span><span class="info-val">'+S.date+'</span></div>';
+  h+='<div class="info-row"><span class="info-lbl">Aircraft</span><span class="info-val">'+S.ac+'</span></div>';
+  h+='<div class="info-row"><span class="info-lbl">Report</span><span class="info-val">'+(rlabels[S.report]||S.report)+'</span></div>';
+  h+='<div class="info-row"><span class="info-lbl">Overweight</span><span class="info-val" style="color:'+(S.ow?'var(--red)':'var(--grn)')+'">'+( S.ow?"YES":"NO")+'</span></div>';
+  h+='<div class="info-row"><span class="info-lbl">AMM Table</span><span class="info-val" style="font-size:11px">'+(tk==="AUTO"?"Auto (SR>540)":td?td.label:"--")+'</span></div></div>';
+
+  // Exceedances
+  if(result.excs.length>0){
+    h+='<div class="sec-lbl" style="color:var(--red)">Exceedances ('+result.excs.length+')</div><div class="card">';
+    for(var i=0;i<result.excs.length;i++){var e=result.excs[i];var v=parseFloat(e.val);var d="";if(e.lim.x!==null&&v>e.lim.x)d="+"+(v-e.lim.x).toFixed(2)+" "+e.u+" over limit";else if(e.lim.n!==null&&v<e.lim.n)d=(v-e.lim.n).toFixed(2)+" "+e.u+" under limit";h+='<div class="exc-row"><div><div class="exc-p">'+e.l+'</div><div class="exc-d">Limit: '+ls(e.lim)+' '+e.u+'</div></div><div><div class="exc-v">'+e.val+' '+e.u+'</div><div class="exc-delta">'+d+'</div></div></div>';}
+    h+='</div>';
+  }
+
+  // Summary
+  h+='<div class="sec-lbl">Parameter Summary</div><div class="card">';
+  for(var i=0;i<PARAMS.length;i++){var p=PARAMS[i];var lim=td?td.lim[p.k]:null;var val=S.v[p.k];var isE=lim&&val!==""?isExc(val,lim):false;var cls=val===""?"na":isE?"fail":"ok";h+='<div class="sum-row"><span class="sum-p">'+p.l+'</span><span class="sum-l">'+(lim?ls(lim):"")+'</span><span class="sum-v '+cls+'">'+(val||"--")+(val?" "+p.u:"")+'</span><span style="font-size:12px;margin-left:4px">'+(val&&lim?(isE?"&#128308;":"&#128994;"):"")+'</span></div>';}
+  h+='</div>';
+
+  if(!pass)h+='<div class="act-note"><div class="act-title">Required Action</div><div class="act-text">Perform B787 AMM 05-51-01 Phase I GVI before next flight.<br>Zones: 100 (Fuselage) &middot; 500 (L Wing) &middot; 600 (R Wing) &middot; 700 (Landing Gear).<br>If damage found &rarr; proceed to Phase II before next flight.</div></div>';
+  h+='<div class="btn-row"><button class="btn btn-sec" onclick="go(1)">&larr; Edit</button><button class="btn btn-gho" onclick="reset()">New Check</button></div>';
+  return h;
+}
+
+// ─── RENDER ──────────────────────────────────────────────────
+function render(){
+  updProg();
+  var c=document.getElementById("content");
+  c.innerHTML=S.step===0?step0():S.step===1?step1():step2();
+  c.classList.remove("anim");void c.offsetWidth;c.classList.add("anim");
+  c.scrollTop=0;
+  // Attach text input listeners step 0
+  var map={flt:"flight",date:"date",ac:"ac"};
+  ["flt","date","ac"].forEach(function(f){var el=document.getElementById("i_"+f);if(el)el.oninput=function(){S[map[f]]=el.value;};});
+}
+
+// ─── ACTIONS ─────────────────────────────────────────────────
+function go(s){
+  if(S.step===0){
+    var a=document.getElementById("i_flt");var b=document.getElementById("i_date");var cc=document.getElementById("i_ac");
+    if(a)S.flight=a.value;if(b)S.date=b.value;if(cc)S.ac=cc.value;
+  }
+  S.step=s;render();
+}
+function selR(v){S.report=v;render();}
+function togOW(){S.ow=!S.ow;render();}
+function upP(k,v){S.v[k]=v;render();}
+function clearPhoto(){S.photoDataUrl=null;S.scanDone=false;S.scanning=false;S.scanError=null;render();}
+function reset(){
+  S={step:0,flight:"",date:new Date().toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'}),
+     ac:"",report:"hard",ow:false,
+     v:{sr:"",pt:"",cr:"",ra:"",brr:"",cga:"",pka:"",bpr:""},
+     photoDataUrl:null,scanDone:false,scanning:false};
+  render();
+}
+
+render();
+</script>
+</body>
+</html>
