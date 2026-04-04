@@ -8,7 +8,7 @@
 <meta name="apple-mobile-web-app-title" content="B787 Check"/>
 <meta name="mobile-web-app-capable" content="yes"/>
 <meta name="theme-color" content="#0A0E1A"/>
-<title>B787 Landing Check – AI FSD</title>
+<title>B787 Landing Check – Air India FSQ</title>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=DM+Sans:wght@400;500;600;700&display=swap');
 :root{--bg:#0A0E1A;--surf:#111827;--surf2:#1C2333;--bor:#2A3444;--acc:#00D4FF;--red:#FF4444;--grn:#00E676;--yel:#FFD600;--txt:#E8EDF5;--muted:#6B7A99;--mono:'JetBrains Mono',monospace;--sans:'DM Sans',sans-serif;}
@@ -152,7 +152,7 @@ body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(
 // CONFIGURATION — paste your Cloudflare Worker URL here
 // e.g. "https://b787-proxy.yourname.workers.dev"
 // ═══════════════════════════════════════════════════════════════
-var WORKER_URL = "https://shy-bush-2b3c.bhukkal.workers.dev";
+var WORKER_URL = "https://YOUR-WORKER.YOUR-NAME.workers.dev";
 
 // ─── AMM DATA ────────────────────────────────────────────────
 var TABLES={
@@ -228,7 +228,7 @@ function callWorker(dataUrl){
       S.scanError="Error: "+data.error+". Please enter values manually.";
       render();return;
     }
-    // Parse Claude's JSON response
+    // Parse Smart Scan JSON response
     try{
       var text=data.result||"";
       var jsonMatch=text.match(/\{[\s\S]*\}/);
@@ -286,18 +286,18 @@ function step1(){
     h+='<div class="scan-zone">';
     h+='<div class="scan-icon">&#128247;</div>';
     h+='<div class="scan-title">Scan LCMP Printout</div>';
-    h+='<div class="scan-sub">Take a clear photo of the ATA 51<br>Landing Conditions Maintenance Page.<br>Claude AI reads all values instantly.</div>';
+    h+='<div class="scan-sub">Take a clear photo of the ATA 51<br>Landing Conditions Maintenance Page.<br>Smart Scan reads all values instantly.</div>';
     h+='</div>';
     h+='<div class="scan-btns"><button class="btn-cam primary" onclick="document.getElementById(\'camInput\').click()">&#128247; Camera</button><button class="btn-cam secondary" onclick="document.getElementById(\'galInput\').click()">&#128444; Gallery</button></div>';
   } else if(S.scanning){
     h+='<div class="scan-zone scanning">';
     h+='<div class="img-wrap"><img class="img-preview" src="'+S.photoDataUrl+'"/></div>';
-    h+='<div class="spinner-wrap"><div class="spinner"></div><div class="spinner-txt">Claude AI reading LCMP values...</div></div>';
+    h+='<div class="spinner-wrap"><div class="spinner"></div><div class="spinner-txt">Smart Scan reading LCMP values...</div></div>';
     h+='</div>';
   } else {
     h+='<div class="img-wrap"><img class="img-preview" src="'+S.photoDataUrl+'"/><button class="img-del" onclick="clearPhoto()">&#10005;</button></div>';
     if(S.scanDone&&S.scanFound){
-      h+='<div class="banner ok"><span class="banner-icon">&#9989;</span><span class="banner-text"><strong>Values extracted by Claude AI.</strong> Verify below and correct if needed.</span></div>';
+      h+='<div class="banner ok"><span class="banner-icon">&#9989;</span><span class="banner-text"><strong>Values extracted by Smart Scan.</strong> Verify below and correct if needed.</span></div>';
       h+='<div class="card">';
       var lbls={sr:"CG Sink Rate",pt:"Pitch Attitude",cr:"Crab Angle",ra:"Roll Attitude",brr:"Body Roll Rate",cga:"CG Norm Accel",pka:"Peak CG Norm Accel",bpr:"Body Pitch Rate"};
       for(var k in lbls){if(S.v[k]!==""){h+='<div class="ext-row"><span class="ext-lbl">'+lbls[k]+'</span><span class="ext-val">'+S.v[k]+'</span><span>&#9989;</span></div>';}}
